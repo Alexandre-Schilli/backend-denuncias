@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const app = express();
 app.use(express.json());
-const port = 3006;
+const port = process.env.PORT || 3006;
 const jwt = require("jsonwebtoken");
 const mongoUrl =
   "mongodb+srv://AvisaManaus:nmuvrmTwvL5cdrJA@cluster0.sffzj.mongodb.net/Login&Registro?retryWrites=true&w=majority&appName=Cluster0";
