@@ -4,7 +4,7 @@
   "description": "inovatech api desenvolvendo em mongoDB",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",  // Este é o comando que inicializa seu servidor
+    "start": "node index.js", 
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Gustavo Paes",
