@@ -1,31 +1,32 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 const app = express();
 app.use(express.json());
-const port = 3006;
-const jwt = require("jsonwebtoken");
-const mongoUrl =
-  "mongodb+srv://AvisaManaus:nmuvrmTwvL5cdrJA@cluster0.sffzj.mongodb.net/Login&Registro?retryWrites=true&w=majority&appName=Cluster0";
-const JWT_SECRET =
-  "lkdsam930200321dl()ldmalsd78391831dnkan91uodal[()]dlas3891kda0120m10d0";
 
-mongoose
-  .connect(mongoUrl)
-  .then(() => {
-    console.log("Banco de dados conectado");
-  })
-  .catch((e) => {
-    console.log("Erro de conexão com o banco de dados:", e);
-  });
+// Configuração centralizada
+const config = {
+  mongoUrl: "mongodb+srv://AvisaManaus:nmuvrmTwvL5cdrJA@cluster0.mongodb.net/Login&Registro?retryWrites=true&w=majority&appName=Cluster0",
+  jwtSecret: "lkdsam930200321dl()ldmalsd78391831dnkan91uodal[()]dlas3891kda0120m10d0",
+  port: 3006
+};
+
+// Conexão com o MongoDB
+mongoose.connect(config.mongoUrl)
+  .then(() => console.log("Banco de dados conectado"))
+  .catch((e) => console.log("Erro de conexão com o banco de dados:", e));
 
 require("./usuarioDetails");
 const usuario = mongoose.model("Usuario");
 
+// Rota inicial para teste
 app.get("/", (req, res) => {
   res.send({ status: "ta on" });
 });
 
+// Rota de cadastro
 app.post("/cadastro", async (req, res) => {
   const { nome, cpf, email, senha, confirmarSenha } = req.body;
 
@@ -33,7 +34,7 @@ app.post("/cadastro", async (req, res) => {
     return res.send({ status: "error", data: "As senhas não correspondem." });
   }
 
-  const usuarioAntigo = await usuario.findOne({ email: email });
+  const usuarioAntigo = await usuario.findOne({ email });
 
   if (usuarioAntigo) {
     return res.send({ data: "Este usuário já existe!" });
@@ -54,11 +55,12 @@ app.post("/cadastro", async (req, res) => {
 
     res.send({ status: "ok", data: "Usuário Criado." });
   } catch (error) {
-    console.error(error); // Logar o erro detalhado
+    console.error(error);
     res.send({ status: "error", data: "Erro ao criar o usuário." });
   }
 });
 
+// Rota de login
 app.post("/login-user", async (req, res) => {
   const { email, senha } = req.body;
 
@@ -79,7 +81,7 @@ app.post("/login-user", async (req, res) => {
         nome: usuarioAntigo.nome,
         email: usuarioAntigo.email,
       },
-      JWT_SECRET,
+      config.jwtSecret,
       { expiresIn: "24h" }
     );
 
@@ -92,11 +94,12 @@ app.post("/login-user", async (req, res) => {
   }
 });
 
+// Rota para obter dados do usuário
 app.post("/dadosUsuario", async (req, res) => {
   const { token } = req.body;
   try {
-    const decodedtoken = jwt.verify(token, JWT_SECRET);
-    const emailUsuario = decodedtoken.email;
+    const decodedToken = jwt.verify(token, config.jwtSecret);
+    const emailUsuario = decodedToken.email;
 
     const usuarioDados = await usuario.findOne({ email: emailUsuario });
 
@@ -115,6 +118,7 @@ app.post("/dadosUsuario", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log("Server on");
+// Iniciar o servidor
+app.listen(config.port, () => {
+  console.log(`Servidor rodando na porta ${config.port}`);
 });
