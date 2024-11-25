@@ -6,7 +6,7 @@ const axios = require("axios");
 const jwt = require("jsonwebtoken");
 
 const app = express();
-const port = 3002;
+const port = process.env.PORT || 3002;
 
 // Configurações
 app.use(cors());
